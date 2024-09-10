@@ -11,32 +11,25 @@ package trace_ctx
 
 import (
 	"context"
-	"strings"
-
-	"github.com/google/uuid"
 )
 
 var (
-	TraceKeyInCtx any = new(byte)
-	rp                = strings.NewReplacer("-", "")
+	TraceKeyInCtx any = new(TraceID)
+	TraceInCtx    any = new(Trace)
 )
 
 const (
 	TraceIDKeyName = "trace_id"
 )
 
-func genTraceID() string {
-	return rp.Replace(uuid.NewString())
-}
-
-func GetTraceID(ctx context.Context) string {
+func GetTraceID(ctx context.Context) TraceID {
 	if ctx == nil {
 		return genTraceID()
 	}
 
 	val := ctx.Value(TraceKeyInCtx)
 	if val != nil {
-		return val.(string)
+		return val.(TraceID)
 	}
 
 	return genTraceID()
@@ -50,10 +43,31 @@ func WithTraceID(ctx context.Context) context.Context {
 	return context.WithValue(ctx, TraceKeyInCtx, genTraceID())
 }
 
-func SetTraceID(ctx context.Context, traceID string) context.Context {
+func SetTraceID(ctx context.Context, traceID TraceID) context.Context {
 	if ctx == nil {
 		panic("ctx is nil")
 	}
 
 	return context.WithValue(ctx, TraceKeyInCtx, traceID)
+}
+
+func WithTrace(ctx context.Context, trace *Trace) context.Context {
+	if ctx == nil {
+		panic("ctx is nil")
+	}
+
+	return context.WithValue(ctx, TraceInCtx, trace)
+}
+
+func GetTrace(ctx context.Context) *Trace {
+	if ctx == nil {
+		panic("ctx is nil")
+	}
+
+	val := ctx.Value(TraceInCtx)
+	if val != nil {
+		return val.(*Trace)
+	}
+
+	return nil
 }
