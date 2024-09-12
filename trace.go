@@ -16,6 +16,17 @@ type (
 	}
 )
 
+func NewTraceWithID(id TraceID) *Trace {
+	if len(id) == 0 {
+		panic("id is empty")
+	}
+	return &Trace{
+		ID:    id,
+		spans: []*Span{},
+		mtx:   &sync.Mutex{},
+	}
+}
+
 func NewTrace() *Trace {
 	return &Trace{
 		ID:    genTraceID(),

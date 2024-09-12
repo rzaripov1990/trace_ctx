@@ -14,8 +14,7 @@ import (
 )
 
 var (
-	TraceKeyInCtx any = new(TraceID)
-	TraceInCtx    any = new(Trace)
+	TraceKeyInCtx any = new(Trace)
 )
 
 const (
@@ -24,15 +23,10 @@ const (
 
 func GetTraceID(ctx context.Context) TraceID {
 	if ctx == nil {
-		return genTraceID()
+		panic("ctx is nil")
 	}
 
-	val := ctx.Value(TraceKeyInCtx)
-	if val != nil {
-		return val.(TraceID)
-	}
-
-	return genTraceID()
+	return GetTrace(ctx).ID
 }
 
 func WithTraceID(ctx context.Context) context.Context {
@@ -40,7 +34,7 @@ func WithTraceID(ctx context.Context) context.Context {
 		panic("ctx is nil")
 	}
 
-	return context.WithValue(ctx, TraceKeyInCtx, genTraceID())
+	return context.WithValue(ctx, TraceKeyInCtx, NewTrace())
 }
 
 func SetTraceID(ctx context.Context, traceID TraceID) context.Context {
@@ -48,7 +42,7 @@ func SetTraceID(ctx context.Context, traceID TraceID) context.Context {
 		panic("ctx is nil")
 	}
 
-	return context.WithValue(ctx, TraceKeyInCtx, traceID)
+	return context.WithValue(ctx, TraceKeyInCtx, NewTraceWithID(traceID))
 }
 
 func WithTrace(ctx context.Context, trace *Trace) context.Context {
@@ -56,7 +50,7 @@ func WithTrace(ctx context.Context, trace *Trace) context.Context {
 		panic("ctx is nil")
 	}
 
-	return context.WithValue(ctx, TraceInCtx, trace)
+	return context.WithValue(ctx, TraceKeyInCtx, trace)
 }
 
 func GetTrace(ctx context.Context) *Trace {
@@ -64,10 +58,10 @@ func GetTrace(ctx context.Context) *Trace {
 		panic("ctx is nil")
 	}
 
-	val := ctx.Value(TraceInCtx)
+	val := ctx.Value(TraceKeyInCtx)
 	if val != nil {
 		return val.(*Trace)
 	}
 
-	return nil
+	return NewTrace()
 }
